@@ -17,6 +17,12 @@ Most code is written in Javascript, with a sprinkling of C++ for WebAssembly and
 [**bakana**](https://github.com/kanaverse/bakana) ("backend **kana**") manages the analysis pipeline and results for the web application.
 It can also be used to execute the same analysis on a backend server via Node.js.
 
+[**scran.js**](https://github.com/kanaverse/scran.js) implements various methods for single-cell data analysis,
+by compiling various C/C++ libraries such as [**libscran**](https://github.com/LTLA/libscran) to WebAssembly.
+
+[**kanapi**](https://github.com/kanaverse/kanapi) provides a more traditional backend for **kana**,
+allowing maintainers to run **bakana** on a server and transfer results to the client via websockets.
+
 ## Contact
 
 This organization is managed by [Aaron "A-bomb" Lun](https://github.com/LTLA) and [Jayaram "Rowling" Kancherla](https://github.com/jkanche).
