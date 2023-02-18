@@ -51,20 +51,26 @@ xcoord <- runif(N, center - ext, center + ext)
 ycoord <- runif(N, center - ext, center + ext)
 
 filter <- sqrt((xcoord - center)^2 + (ycoord - center)^2) <= radius
-keep <- filter | rbinom(N, 1, 0.1)
+keep <- filter | rbinom(N, 1, 0.01)
 xcoord <- xcoord[keep]
 ycoord <- ycoord[keep]
 
-# Choosing colors.
+# Choosing colors, with a nice gradient for some depth.
 ramp <- colorRamp(c("white", "blue"))(0:10/10)
 gradients <- apply(ramp, 1, function(x) rgb(x[1], x[2], x[3], maxColorValue=255))
-outside.weighting <- rep(c(1,2,5), c(1, 4, 6))
 inside.weighting <- rep(c(8, 1, 0), c(1, 2, 8))
+left.weighting <- rep(c(1,2,10), c(3, 4, 4))
+right.weighting <- rep(c(1,5,0), c(1,3,7))
 
 is.inside <- mgcv::in.out(poly.k, cbind(xcoord, ycoord))
 colors <- character(length(is.inside))
 colors[is.inside] <- sample(gradients, sum(is.inside), prob=inside.weighting, replace=TRUE)
-colors[!is.inside] <- sample(gradients, sum(!is.inside), prob=outside.weighting, replace=TRUE)
+
+proj <- xcoord[!is.inside] - (center - 0.1)
+proj <- pmax(pmin(proj / (radius - 0.2), 1), 0)
+use.left <- rbinom(length(proj), 1, p=proj) == 0
+colors[!is.inside][use.left] <- sample(gradients, sum(use.left), prob=left.weighting, replace=TRUE)
+colors[!is.inside][!use.left] <- sample(gradients, sum(!use.left), prob=right.weighting, replace=TRUE)
 
 # Creating the raw logo for full use.
 png("logo.png", width=3, height=3, units="in", res=180)
@@ -88,13 +94,13 @@ points(xsub[refilter], ysub[refilter], pch=16, cex=1, col=colors[sub][refilter])
 dev.off()
 
 # Creating a GIF.
-relstepsize <- rep(c(1, 0.1, 0.05, 0.01), c(5, 5, 5, 5))
+relstepsize <- rep(c(1, 0.5, 0.1, 0.05, 0.01), c(5, 5, 5, 5, 5))
 relstepsize <- c(0, cumsum(relstepsize / sum(relstepsize)))
 imgs <- character(0)
 dir.create("sequence") 
 
 for (forward in c(TRUE, FALSE)) {
-    xrand <- rnorm(length(xcoord), mean=center)
+    xrand <- rnorm(length(xcoord), mean=center + radius * 2 * if (forward) -1 else 1, sd=0.5) 
     yrand <- rnorm(length(ycoord), mean=center)
 
     xsteps <- xcoord - xrand 
