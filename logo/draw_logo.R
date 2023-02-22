@@ -52,25 +52,22 @@ ycoord <- runif(N, center - ext, center + ext)
 
 filter <- sqrt((xcoord - center)^2 + (ycoord - center)^2) <= radius
 keep <- filter | rbinom(N, 1, 0.01)
+
+is.inside <- mgcv::in.out(poly.k, cbind(xcoord, ycoord))
+keep <- keep & (!is.inside | rbinom(N, 1, 0.05))
 xcoord <- xcoord[keep]
 ycoord <- ycoord[keep]
 
 # Choosing colors, with a nice gradient for some depth.
-ramp <- colorRamp(c("white", "blue"))(0:10/10)
-gradients <- apply(ramp, 1, function(x) rgb(x[1], x[2], x[3], maxColorValue=255))
-inside.weighting <- rep(c(8, 1, 0), c(1, 2, 8))
-left.weighting <- rep(c(1,2,10), c(3, 4, 4))
-right.weighting <- rep(c(1,5,0), c(1,3,7))
+host.colors <- c("#C23B23", "#F39A27", "#976ED7", "#03C03C", "#579ABE", "#EADA52")
+xpos <- c(0, 0, 0.5, 0.7, 0.7, 1)
+ypos <- c(0, 1, 0.5, 0, 1, 0.5)
 
-is.inside <- mgcv::in.out(poly.k, cbind(xcoord, ycoord))
-colors <- character(length(is.inside))
-colors[is.inside] <- sample(gradients, sum(is.inside), prob=inside.weighting, replace=TRUE)
-
-proj <- xcoord[!is.inside] - (center - 0.1)
-proj <- pmax(pmin(proj / (radius - 0.2), 1), 0)
-use.left <- rbinom(length(proj), 1, p=proj) == 0
-colors[!is.inside][use.left] <- sample(gradients, sum(use.left), prob=left.weighting, replace=TRUE)
-colors[!is.inside][!use.left] <- sample(gradients, sum(!use.left), prob=right.weighting, replace=TRUE)
+library(FNN)
+closest <- get.knnx(query=cbind(xcoord, ycoord), data=cbind(xpos, ypos), k=2)
+switch <- 0.5 * exp(-(closest$nn.dist[,2]/closest$nn.dist[,1])^2 / 1.5)
+chosen <- ifelse(runif(nrow(closest$nn.index)) >= switch, closest$nn.index[,1], closest$nn.index[,2])
+colors <- host.colors[chosen]
 
 # Creating the raw logo for full use.
 png("logo.png", width=3, height=3, units="in", res=180)
