@@ -2,12 +2,12 @@
 
 ## About
 
-[**kana**](https://jkanche.com/kana) is a web application for interactive analysis of single-cell genomics data.
+[**kana**](https://kanaverse.org/kana) is a web application for interactive analysis of single-cell genomics data.
 Its unique selling point is that all computation is done on the client machine, rather than being transferred to a backend server;
 this simplifies deployment, avoids latency and data ownership issues, and provides greater scalability across users.
 Check out [our manuscript](https://www.biorxiv.org/content/10.1101/2022.03.02.482701v1) for more details.
 
-![Overview and Analysis pbmc 68k dataset](https://github.com/jkanche/kana/blob/master/assets/v2_adt.gif)
+![Overview and Analysis of Zillinois Lung dataset](https://raw.githubusercontent.com/kanaverse/kana/master/assets/v3_release.gif)
 
 This organization manages the code for the **kana** application as well as the underlying packages and resources.
 Most code is written in Javascript, with a sprinkling of C++ for WebAssembly and R for some preprocessing.
